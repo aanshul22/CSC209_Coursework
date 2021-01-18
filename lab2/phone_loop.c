@@ -8,9 +8,7 @@ int main() {
 
     scanf("%s", phone);
 
-    while (1) {
-
-        scanf("%d", &num);
+    while (scanf("%d", &num) == 1) {
 
         if (num == -1) {
             printf("%s\n", phone);
