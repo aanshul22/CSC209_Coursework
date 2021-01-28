@@ -79,12 +79,11 @@ int main(int argc, char *argv[]) {
 
     printf("Loading training data...\n");
 
-    // TODO: (use load_dataset)
+    num_training_files = load_dataset(training_file_list, training_dataset, training_labels);
 
     printf("Loading testing data...\n");
 
-    // TODO: (use load_dataset)
-    
+    num_test_files = load_dataset(test_file_list, test_dataset, test_labels);
 
     /* TODO: for each image in the test image dataset, call knn_predict
      * to make a prediction for what digit is represented.  If the
@@ -93,6 +92,18 @@ int main(int argc, char *argv[]) {
      * you how many images of each type you have.
      */
 
+    int prediction;
+
+    for (int i = 0; i < num_test_files; i++) {
+        prediction = knn_predict(test_dataset[i], K,
+                                 training_dataset,
+                                 training_labels,
+                                 num_training_files);
+
+        if (prediction == test_labels[i]) {
+            num_correct += 1;
+        }
+    }
 
     // Print out answer
     printf("Number of correct predictions: %d\n", num_correct);
