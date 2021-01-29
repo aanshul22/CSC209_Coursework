@@ -56,10 +56,14 @@ void load_image(char *filename, unsigned char *img) {
 	
     int width, height;
 
-    fscanf(f2, "P2 %d %d 255 ", &width, &height);
+    if (fscanf(f2, "P2 %d %d 255 ", &width, &height) != 2) {
+        fprintf(stderr, "Unable to read header information for file %s.", filename);
+    }
 
     for (int i = 0; i < NUM_PIXELS; ++i) {
-        fscanf(f2, "%hhu", &img[i]);
+        if (fscanf(f2, "%hhu", &img[i]) != 1) {
+            fprintf(stderr, "Error reading pixels in file %s", filename);
+        }
     }
 
     fclose(f2);
