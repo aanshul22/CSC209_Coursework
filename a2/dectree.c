@@ -30,7 +30,38 @@
  */
 Dataset *load_dataset(const char *filename) {
     // TODO: Allocate data, read image data / labels, return
-    return NULL;
+
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file: %s\n", filename);
+		return NULL;
+    }
+
+    Dataset *ds = malloc(sizeof(Dataset));
+
+	fread(&(ds->num_items), sizeof(int), 1, file);
+
+	Image *images = malloc(sizeof(Image) * ds->num_items);
+
+	unsigned char *labels = malloc(sizeof(unsigned char) * ds->num_items);
+
+	for (int i = 0; i < ds->num_items; i++) {
+		images[i].sx=WIDTH;
+		images[i].sy=WIDTH;
+		fread(&labels[i], sizeof(unsigned char), 1, file);
+
+		images[i].data = malloc(sizeof(unsigned char) * NUM_PIXELS);
+		fread(images[i].data, sizeof(unsigned char), NUM_PIXELS, file);
+	}
+
+	ds->images = images;
+
+	if (fclose(file) != 0) {
+		fprintf(stderr, "Error closing file: %s\n", filename);
+		return NULL;
+	}
+
+    return ds;
 }
 
 /**
