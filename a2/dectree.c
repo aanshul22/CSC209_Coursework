@@ -127,7 +127,6 @@ void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq
 
 	for (int i = 0; i < M; i++) {
 		frequencies[data->labels[indices[i]]]++;
-		printf("%d", data->labels[indices[i]]);
 	}
 
 	*freq = frequencies[0];
@@ -137,8 +136,6 @@ void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq
             *freq = frequencies[i];
         }
     }
-
-    return;
 }
 
 /**
@@ -153,8 +150,16 @@ void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq
  * If multiple pixels have the same minimal Gini impurity, return the smallest.
  */
 int find_best_split(Dataset *data, int M, int *indices) {
-    // TODO: Return the correct pixel
-    return 0;
+	float minimum_impurity = INFINITY;
+	int pixel = 0;
+    for (int i = 0; i < NUM_PIXELS; i++) {
+		float temp_impurity = gini_impurity(data, M, indices, i);
+		if (temp_impurity < minimum_impurity) {
+			minimum_impurity = temp_impurity;
+			pixel = i;
+		}
+	}
+    return pixel;
 }
 
 /**

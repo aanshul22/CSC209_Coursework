@@ -61,7 +61,9 @@ int main(int argc, char *argv[]) {
 	// }
 	// printf("\n");
 
-	printf("Label %d: %d\n", label, freq);
+	int a = find_best_split(ds, 15, s);
+
+	printf("Label %d: %d\n", a, freq);
 
 
 	printf("\n");
