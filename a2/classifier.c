@@ -44,7 +44,25 @@
 int main(int argc, char *argv[]) {
     int total_correct = 0;
 
-    load_dataset("./datasets/testing_data.bin");
+    Dataset *ds = load_dataset("./datasets/testing_data.bin");
+
+	int label;
+	int freq;
+	int s[15]={0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};	
+	get_most_frequent(ds, 15, s, &label, &freq);
+
+	// printf("%d\n", ds->num_items);
+	// printf("%d\n", ds->labels[0]);
+	// for (int i = 0; i < NUM_PIXELS; i++) {
+	// 	printf("%d ", ds->images[0].data[i]);
+	// 	if ((i+1) % WIDTH == 0) {
+	// 		printf("\n");
+	// 	}
+	// }
+	// printf("\n");
+
+	printf("Label %d: %d\n", label, freq);
+
 
 	printf("\n");
 

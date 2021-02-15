@@ -55,6 +55,7 @@ Dataset *load_dataset(const char *filename) {
 	}
 
 	ds->images = images;
+	ds->labels = labels;
 
 	if (fclose(file) != 0) {
 		fprintf(stderr, "Error closing file: %s\n", filename);
@@ -121,6 +122,22 @@ void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq
     // TODO: Set the correct values and return
     *label = 0;
     *freq = 0;
+
+    int frequencies[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	for (int i = 0; i < M; i++) {
+		frequencies[data->labels[indices[i]]]++;
+		printf("%d", data->labels[indices[i]]);
+	}
+
+	*freq = frequencies[0];
+    for (int i = 1; i < 10; i++) {
+        if (frequencies[i] > frequencies[*label]) {
+            *label = i;
+            *freq = frequencies[i];
+        }
+    }
+
     return;
 }
 
