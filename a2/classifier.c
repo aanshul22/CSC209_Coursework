@@ -42,12 +42,24 @@
   * 
   */
 int main(int argc, char *argv[]) {
+
+	if (argc != 3) {
+		fprintf(stderr, "Usage: ./classifier datasets/<training binary> datasets/<testing binary>\n");
+		return 1;
+	}
+
     int total_correct = 0;
 	int prediction;
 
 	Dataset *training_data = load_dataset(argv[1]);
+	if (training_data == NULL) {
+		return 1;
+	}
 	printf("\nLoaded training data\n\n");
 	Dataset *testing_data = load_dataset(argv[2]);
+	if (testing_data == NULL) {
+		return 1;
+	}
 	printf("Loaded testing data\n\n");
 
 	DTNode *root = build_dec_tree(training_data);
