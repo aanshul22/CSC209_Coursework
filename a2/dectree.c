@@ -276,10 +276,10 @@ void free_dec_tree(DTNode *node) {
 
 	free(node);
 
-	if (node->left != NULL) {
+	if (left != NULL) {
 		free_dec_tree(left);
 	}
-	if (node->right != NULL) {
+	if (right != NULL) {
 		free_dec_tree(right);
 	}
 }
