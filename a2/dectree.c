@@ -183,9 +183,52 @@ int find_best_split(Dataset *data, int M, int *indices) {
  *         (using build_subtree recursively). 
  */
 DTNode *build_subtree(Dataset *data, int M, int *indices) {
-    // TODO: Construct and return the tree
+    float frequencies[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    return NULL;
+	for (int i = 0; i < M; i++) {
+		frequencies[data->labels[indices[i]]]++;
+	}
+	int frequent = 0;
+	float frequency = frequencies[0];
+	for (int i = 1; i < 10; i++) {
+		if (frequencies[i] > frequency) {
+			frequency = frequencies[i];
+			frequent = i;
+		}
+	}
+	frequency = frequency / M;
+	
+	DTNode *node = malloc(sizeof(DTNode));
+
+	if (frequency > THRESHOLD_RATIO) {
+		node->classification = frequent;
+		node->left = NULL;
+		node->right = NULL;
+	}
+	else {
+		int best_split = find_best_split(data, M, indices);
+		int *left_indices = malloc(sizeof(int) * M);
+		int *right_indices = malloc(sizeof(int) * M);
+		int left_M = 0, right_M = 0;
+		for (int i = 0; i < M; i++) {
+			if (data->images[indices[i]].data[best_split] < 128) {
+				left_indices[left_M] = indices[i];
+				left_M++;
+			}
+			else {
+				right_indices[right_M] = indices[i];
+				right_M++;
+			}
+		}
+		node->pixel = best_split;
+		node->left = build_subtree(data, left_M, left_indices);
+		node->right = build_subtree(data, right_M, right_indices);
+
+		free(left_indices);
+		free(right_indices);
+	}
+
+    return node;
 }
 
 /**
@@ -197,38 +240,58 @@ DTNode *build_dec_tree(Dataset *data) {
     // TODO: Set up `indices` array, call `build_subtree` and return the tree.
     // HINT: Make sure you free any data that is not needed anymore
 
-    return NULL;
+	int *indices = malloc(sizeof(int) * data->num_items);
+	for (int i = 0; i < data->num_items; i++) {
+		indices[i] = i;
+	}
+
+	DTNode *root = build_subtree(data, data->num_items, indices);
+
+	free(indices);
+
+    return root;
 }
 
 /**
  * Given a decision tree and an image to classify, return the predicted label.
  */
 int dec_tree_classify(DTNode *root, Image *img) {
-    // TODO: Return the correct label
-
-    return -1;
+	if (root->left == NULL && root->right == NULL) {
+		return root->classification;
+	}
+    else if (img->data[root->pixel] < 128) {
+		return dec_tree_classify(root->left, img);
+	}
+	else {
+		return dec_tree_classify(root->right, img);
+	}
 }
 
 /**
  * This function frees the Decision tree.
  */
 void free_dec_tree(DTNode *node) {
-    // TODO: Free the decision tree
+	DTNode *left = node->left;
+	DTNode *right = node->right;
 
-    return;
+	free(node);
+
+	if (node->left != NULL) {
+		free_dec_tree(left);
+	}
+	if (node->right != NULL) {
+		free_dec_tree(right);
+	}
 }
 
 /**
  * Free all the allocated memory for the dataset
  */
 void free_dataset(Dataset *data) {
-    printf("lables: %p\nimages: %p\ndata: %p\n", data->labels, data->images, data);
     free(data->labels);
     for (int i = 0; i < data->num_items; i++) {
         free(data->images[i].data);
     }
     free(data->images);
     free(data);
-
-    return;
 }

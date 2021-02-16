@@ -43,30 +43,31 @@
   */
 int main(int argc, char *argv[]) {
     int total_correct = 0;
+	int prediction;
 
-    Dataset *ds = load_dataset("./datasets/testing_data.bin");
+	Dataset *training_data = load_dataset(argv[1]);
+	printf("\nLoaded training data\n\n");
+	Dataset *testing_data = load_dataset(argv[2]);
+	printf("Loaded testing data\n\n");
 
-	int label;
-	int freq;
-	int s[15]={0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};	
-	get_most_frequent(ds, 15, s, &label, &freq);
+	DTNode *root = build_dec_tree(training_data);
 
-	// printf("%d\n", ds->num_items);
-	// printf("%d\n", ds->labels[0]);
-	// for (int i = 0; i < NUM_PIXELS; i++) {
-	// 	printf("%d ", ds->images[0].data[i]);
-	// 	if ((i+1) % WIDTH == 0) {
-	// 		printf("\n");
-	// 	}
-	// }
-	// printf("\n");
+	printf("Built dec tree\n\n");
 
-	int a = find_best_split(ds, 15, s);
+	for (int i = 0; i < testing_data->num_items; i++) {
+		prediction = dec_tree_classify(root, &(testing_data->images[i]));
+		if (prediction == testing_data->labels[i]) {
+			total_correct++;
+		}
+	}
 
-	printf("Label %d: %d\n", a, freq);
-	free_dataset(ds);
+	printf("Completed testing data\n\n");
 
-	printf("\n");
+	free_dataset(training_data);
+	free_dataset(testing_data);
+	free_dec_tree(root);
+
+	printf("Freed all data\n\n");
 
     // Print out answer
     printf("%d\n", total_correct);
