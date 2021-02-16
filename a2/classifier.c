@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 	int a = find_best_split(ds, 15, s);
 
 	printf("Label %d: %d\n", a, freq);
-
+	free_dataset(ds);
 
 	printf("\n");
 
