@@ -33,7 +33,7 @@
   *
   * You need to do the following:
   *    - Parse the command line arguments, call `load_dataset()` appropriately.
-  *    - Call `make_dec_tree()` to build the decision tree with training data
+  *    - Call `build_dec_tree()` to build the decision tree with training data
   *    - For each test image, call `dec_tree_classify()` and compare the real 
   *        label with the predicted label
   *    - Print out (only) one integer to stdout representing the number of 
@@ -44,27 +44,17 @@
 int main(int argc, char *argv[]) {
 
 	if (argc != 3) {
-		fprintf(stderr, "Usage: ./classifier datasets/<training binary> datasets/<testing binary>\n");
-		return 1;
+		fprintf(stderr, "Usage: ./classifier TRAINING_BINARY TESTING_BINARY\n");
+		exit(1);
 	}
 
     int total_correct = 0;
 	int prediction;
 
 	Dataset *training_data = load_dataset(argv[1]);
-	if (training_data == NULL) {
-		return 1;
-	}
-	printf("\nLoaded training data\n\n");
 	Dataset *testing_data = load_dataset(argv[2]);
-	if (testing_data == NULL) {
-		return 1;
-	}
-	printf("Loaded testing data\n\n");
 
 	DTNode *root = build_dec_tree(training_data);
-
-	printf("Built dec tree\n\n");
 
 	for (int i = 0; i < testing_data->num_items; i++) {
 		prediction = dec_tree_classify(root, &(testing_data->images[i]));
@@ -73,13 +63,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	printf("Completed testing data\n\n");
-
 	free_dataset(training_data);
 	free_dataset(testing_data);
 	free_dec_tree(root);
-
-	printf("Freed all data\n\n");
 
     // Print out answer
     printf("%d\n", total_correct);

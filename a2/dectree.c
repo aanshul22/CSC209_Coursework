@@ -33,25 +33,52 @@ Dataset *load_dataset(const char *filename) {
 
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", filename);
-		return NULL;
+        perror(filename);
+		exit(1);
     }
 
     Dataset *ds = malloc(sizeof(Dataset));
+	if (ds == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 
-	fread(&(ds->num_items), sizeof(int), 1, file);
+	if (fread(&(ds->num_items), sizeof(int), 1, file) == 0) {
+		fprintf(stderr, "Couldn't read number of images in file: %s", filename);
+		exit(1);
+	}
 
 	Image *images = malloc(sizeof(Image) * ds->num_items);
+	if (images == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 
 	unsigned char *labels = malloc(sizeof(unsigned char) * ds->num_items);
+	if (labels == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 
 	for (int i = 0; i < ds->num_items; i++) {
 		images[i].sx=WIDTH;
 		images[i].sy=WIDTH;
-		fread(&labels[i], sizeof(unsigned char), 1, file);
+
+		if (fread(&labels[i], sizeof(unsigned char), 1, file) == 0) {
+			fprintf(stderr, "Couldn't read label for image %d", i);
+			exit(1);
+		}
 
 		images[i].data = malloc(sizeof(unsigned char) * NUM_PIXELS);
-		fread(images[i].data, sizeof(unsigned char), NUM_PIXELS, file);
+		if (images[i].data == NULL) {
+			perror("malloc");
+			exit(1);
+		}
+
+		if (fread(images[i].data, sizeof(unsigned char), NUM_PIXELS, file) == 0) {
+			fprintf(stderr, "Couldn't read data for image %d", i);
+			exit(1);
+		}
 	}
 
 	ds->images = images;
@@ -59,7 +86,7 @@ Dataset *load_dataset(const char *filename) {
 
 	if (fclose(file) != 0) {
 		fprintf(stderr, "Error closing file: %s\n", filename);
-		return NULL;
+		exit(1);
 	}
 
     return ds;
@@ -199,6 +226,10 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 	frequency = frequency / M;
 	
 	DTNode *node = malloc(sizeof(DTNode));
+	if (node == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 
 	if (frequency > THRESHOLD_RATIO) {
 		node->classification = frequent;
@@ -207,8 +238,18 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 	}
 	else {
 		int best_split = find_best_split(data, M, indices);
+
 		int *left_indices = malloc(sizeof(int) * M);
+		if (left_indices == NULL) {
+			perror("malloc");
+			exit(1);
+		}
 		int *right_indices = malloc(sizeof(int) * M);
+		if (right_indices == NULL) {
+			perror("malloc");
+			exit(1);
+		}
+
 		int left_M = 0, right_M = 0;
 		for (int i = 0; i < M; i++) {
 			if (data->images[indices[i]].data[best_split] < 128) {
@@ -241,6 +282,10 @@ DTNode *build_dec_tree(Dataset *data) {
     // HINT: Make sure you free any data that is not needed anymore
 
 	int *indices = malloc(sizeof(int) * data->num_items);
+	if (indices == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 	for (int i = 0; i < data->num_items; i++) {
 		indices[i] = i;
 	}
