@@ -262,6 +262,7 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 			}
 		}
 		node->pixel = best_split;
+		node->classification = -1;
 		node->left = build_subtree(data, left_M, left_indices);
 		node->right = build_subtree(data, right_M, right_indices);
 
