@@ -29,52 +29,59 @@
  * Use the NUM_PIXELS and WIDTH constants defined in dectree.h
  */
 Dataset *load_dataset(const char *filename) {
-    // TODO: Allocate data, read image data / labels, return
-
+	// Openning file
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
         perror(filename);
 		exit(1);
     }
 
+	// Allocating memory for the dataset
     Dataset *ds = malloc(sizeof(Dataset));
 	if (ds == NULL) {
 		perror("malloc");
 		exit(1);
 	}
 
+	// Reading the number of items from the dataset
 	if (fread(&(ds->num_items), sizeof(int), 1, file) == 0) {
 		fprintf(stderr, "Couldn't read number of images in file: %s", filename);
 		exit(1);
 	}
 
+	// Allocating memory for all the images
 	Image *images = malloc(sizeof(Image) * ds->num_items);
 	if (images == NULL) {
 		perror("malloc");
 		exit(1);
 	}
 
+	// Allocating memory for all the labels
 	unsigned char *labels = malloc(sizeof(unsigned char) * ds->num_items);
 	if (labels == NULL) {
 		perror("malloc");
 		exit(1);
 	}
 
+	// Loop to read each image
 	for (int i = 0; i < ds->num_items; i++) {
 		images[i].sx=WIDTH;
 		images[i].sy=WIDTH;
 
+		// Reading label of the image
 		if (fread(&labels[i], sizeof(unsigned char), 1, file) == 0) {
 			fprintf(stderr, "Couldn't read label for image %d", i);
 			exit(1);
-		}
+		}	
 
+		// Allocating memory for all the pixels of the image
 		images[i].data = malloc(sizeof(unsigned char) * NUM_PIXELS);
 		if (images[i].data == NULL) {
 			perror("malloc");
 			exit(1);
 		}
 
+		// Reading all the pixels of the image
 		if (fread(images[i].data, sizeof(unsigned char), NUM_PIXELS, file) == 0) {
 			fprintf(stderr, "Couldn't read data for image %d", i);
 			exit(1);
@@ -84,8 +91,9 @@ Dataset *load_dataset(const char *filename) {
 	ds->images = images;
 	ds->labels = labels;
 
+	// Closing the file
 	if (fclose(file) != 0) {
-		fprintf(stderr, "Error closing file: %s\n", filename);
+		perror(filename);
 		exit(1);
 	}
 
@@ -146,7 +154,6 @@ double gini_impurity(Dataset *data, int M, int *indices, int pixel) {
  * If multiple labels have the same maximal frequency, return the smallest one.
  */
 void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq) {
-    // TODO: Set the correct values and return
     *label = 0;
     *freq = 0;
 
@@ -212,9 +219,12 @@ int find_best_split(Dataset *data, int M, int *indices) {
 DTNode *build_subtree(Dataset *data, int M, int *indices) {
     float frequencies[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+	// Calculating the frequency of each label
 	for (int i = 0; i < M; i++) {
 		frequencies[data->labels[indices[i]]]++;
 	}
+
+	// Finding the most frequent label
 	int frequent = 0;
 	float frequency = frequencies[0];
 	for (int i = 1; i < 10; i++) {
@@ -223,22 +233,29 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 			frequent = i;
 		}
 	}
+
+	// Converting to the most frequent ratio
 	frequency = frequency / M;
 	
+	// Allocating memory a node in the tree
 	DTNode *node = malloc(sizeof(DTNode));
 	if (node == NULL) {
 		perror("malloc");
 		exit(1);
 	}
 
+	// Checking if freqency ratio is greater than the THRESHOLD_RATIO
 	if (frequency > THRESHOLD_RATIO) {
+		// If greater, setting the node to be a leaf
 		node->classification = frequent;
 		node->left = NULL;
 		node->right = NULL;
 	}
 	else {
+		// Finding the best pixel to split on
 		int best_split = find_best_split(data, M, indices);
 
+		// Allocating memory for both the indices' arrays after the split
 		int *left_indices = malloc(sizeof(int) * M);
 		if (left_indices == NULL) {
 			perror("malloc");
@@ -250,6 +267,8 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 			exit(1);
 		}
 
+		// Splitting the image indices into their respective arrays
+		// based on the best pixel split
 		int left_M = 0, right_M = 0;
 		for (int i = 0; i < M; i++) {
 			if (data->images[indices[i]].data[best_split] < 128) {
@@ -261,11 +280,14 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 				right_M++;
 			}
 		}
+
+		// Setting the node values
 		node->pixel = best_split;
 		node->classification = -1;
 		node->left = build_subtree(data, left_M, left_indices);
 		node->right = build_subtree(data, right_M, right_indices);
 
+		// Freeing memory 
 		free(left_indices);
 		free(right_indices);
 	}
@@ -279,8 +301,6 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
  * `build_subtree()` with the correct parameters.
  */
 DTNode *build_dec_tree(Dataset *data) {
-    // TODO: Set up `indices` array, call `build_subtree` and return the tree.
-    // HINT: Make sure you free any data that is not needed anymore
 
 	int *indices = malloc(sizeof(int) * data->num_items);
 	if (indices == NULL) {

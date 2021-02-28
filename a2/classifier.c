@@ -43,6 +43,7 @@
   */
 int main(int argc, char *argv[]) {
 
+	// Checking correct number of arguments
 	if (argc != 3) {
 		fprintf(stderr, "Usage: ./classifier TRAINING_BINARY TESTING_BINARY\n");
 		exit(1);
@@ -51,11 +52,14 @@ int main(int argc, char *argv[]) {
     int total_correct = 0;
 	int prediction;
 
+	// Loading datasets
 	Dataset *training_data = load_dataset(argv[1]);
 	Dataset *testing_data = load_dataset(argv[2]);
 
+	// Building the dectree
 	DTNode *root = build_dec_tree(training_data);
 
+	// Counting the correct number of predictions
 	for (int i = 0; i < testing_data->num_items; i++) {
 		prediction = dec_tree_classify(root, &(testing_data->images[i]));
 		if (prediction == testing_data->labels[i]) {
@@ -63,6 +67,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	// Free-ing all the allocated memory
 	free_dataset(training_data);
 	free_dataset(testing_data);
 	free_dec_tree(root);
