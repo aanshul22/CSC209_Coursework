@@ -185,13 +185,17 @@ void get_most_frequent(Dataset *data, int M, int *indices, int *label, int *freq
  */
 int find_best_split(Dataset *data, int M, int *indices) {
 	float minimum_impurity = INFINITY;
-	int pixel = 0;
+	int pixel = -1;
     for (int i = 0; i < NUM_PIXELS; i++) {
 		float temp_impurity = gini_impurity(data, M, indices, i);
 		if (temp_impurity < minimum_impurity) {
 			minimum_impurity = temp_impurity;
 			pixel = i;
 		}
+	}
+	if (pixel == -1){
+		fprintf(stderr, "Could not find split. All gini impurities were NAN");
+		exit(1);
 	}
     return pixel;
 }
