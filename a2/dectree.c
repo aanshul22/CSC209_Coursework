@@ -259,9 +259,17 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 		// Finding the best pixel to split on
 		int best_split = find_best_split(data, M, indices);
 
-		// Creating the indices' arrays after the split
-		int left_indices[M];
-		int right_indices[M];
+		// Allocating memory for both the indices' arrays after the split
+		int *left_indices = malloc(sizeof(int) * M);
+		if (left_indices == NULL) {
+			perror("malloc");
+			exit(1);
+		}
+		int *right_indices = malloc(sizeof(int) * M);
+		if (right_indices == NULL) {
+			perror("malloc");
+			exit(1);
+		}
 
 		// Splitting the image indices into their respective arrays
 		// based on the best pixel split
@@ -282,6 +290,10 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
 		node->classification = -1;
 		node->left = build_subtree(data, left_M, left_indices);
 		node->right = build_subtree(data, right_M, right_indices);
+
+		// Freeing memory 
+		free(left_indices);
+		free(right_indices);
 	}
 
     return node;
@@ -294,19 +306,18 @@ DTNode *build_subtree(Dataset *data, int M, int *indices) {
  */
 DTNode *build_dec_tree(Dataset *data) {
 
-	// int *indices = malloc(sizeof(int) * data->num_items);
-	// if (indices == NULL) {
-	// 	perror("malloc");
-	// 	exit(1);
-	// }
-	int indices[data->num_items];
+	int *indices = malloc(sizeof(int) * data->num_items);
+	if (indices == NULL) {
+		perror("malloc");
+		exit(1);
+	}
 	for (int i = 0; i < data->num_items; i++) {
 		indices[i] = i;
 	}
 
 	DTNode *root = build_subtree(data, data->num_items, indices);
 
-	// free(indices);
+	free(indices);
 
     return root;
 }
