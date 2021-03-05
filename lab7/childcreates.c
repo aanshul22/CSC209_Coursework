@@ -6,6 +6,7 @@
 int main(int argc, char **argv) {
     int i;
     int iterations;
+    int n = 0;
 
     if (argc != 2) {
         fprintf(stderr, "Usage: forkloop <iterations>\n");
@@ -15,7 +16,9 @@ int main(int argc, char **argv) {
     iterations = strtol(argv[1], NULL, 10);
 
     for (i = 0; i < iterations; i++) {
-        int n = fork();
+        if (n == 0){
+            n = fork();
+        }
         if (n < 0) {
             perror("fork");
             exit(1);
@@ -25,12 +28,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
-// Question 3: How many processes are created, including the original parent,
-// when forkloop is called with 2, 3, and 4 as arguments? n arguments?
-//
-// Ans. 
-// n = 2 : 4
-// n = 3 : 8
-// n = 4 : 16
-// n : 2^n

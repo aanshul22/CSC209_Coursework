@@ -23,3 +23,12 @@ int main() {
     printf("E\n");
     return 0;
 }
+
+// Question 1: Which lines of output are printed more than once?
+//
+// Ans. B and E
+//
+// Question 2: Write down all the different possible orders for the output.
+// Note that this includes output orders that you may not be able to reproduce.
+//
+// Ans. 10 diff possibilities
