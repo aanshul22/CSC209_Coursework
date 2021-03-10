@@ -36,13 +36,13 @@ int main(void) {
 	password[sizeof(password) - 1] = '\0';
 
 	if (strlen(user_id) > MAX_PASSWORD) {
-		fprintf(stderr, "Size of user id too big!\n");
-		// exit(1);
+		printf(NO_USER);
+		exit(1);
 	}
 
 	if (strlen(password) > MAX_PASSWORD) {
-		fprintf(stderr, "Size of password too big!\n");
-		// exit(1);
+		printf(INVALID);
+		exit(1);
 	}
 
 	int fd[2];
