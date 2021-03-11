@@ -35,12 +35,12 @@ int main(void) {
 	user_id[sizeof(user_id) - 1] = '\0';
 	password[sizeof(password) - 1] = '\0';
 
-	if (strlen(user_id) > MAX_PASSWORD) {
+	if (strlen(user_id) > MAX_PASSWORD + 1) {
 		printf(NO_USER);
 		exit(1);
 	}
 
-	if (strlen(password) > MAX_PASSWORD) {
+	if (strlen(password) > MAX_PASSWORD + 1) {
 		printf(INVALID);
 		exit(1);
 	}
