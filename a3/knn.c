@@ -95,7 +95,7 @@ int knn_predict(Dataset *data, Image *input, int K, double (*fptr)(Image *, Imag
         
         // TODO Change the call below to call distance function passed in as
         // a parameter
-        double dist = distance_euclidean(&data->images[i], input);
+        double dist = (*fptr)(&data->images[i], input);
 
         // Find the maximum distance among the previous K closest
         double max_dist = -1;
@@ -169,9 +169,41 @@ void free_dataset(Dataset *data) {
  *        the parent (through p_out)
  */
 void child_handler(Dataset *training, Dataset *testing, int K, 
-                   double (*fptr)(Image *, Image *),int p_in, int p_out) {
+                   double (*fptr)(Image *, Image *), int p_in, int p_out) {
 
     //TODO
+
+    int start_idx, N;
+    // Maybe check for zero bytes read
+    if (read(p_in, &start_idx, sizeof(int)) == -1) {
+        perror("Read from pipe");
+        exit(1);
+    }
+    if (read(p_in, &N, sizeof(int)) == -1) {
+        perror("Read from pipe");
+        exit(1);
+    }
+
+    close(p_in);
+
+    int prediction, num_correct = 0;
+    for (int i = start_idx; i < fmin(start_idx + N, testing->num_items); i++)
+    {
+        prediction = knn_predict(training,
+                                 &(testing->images[i]),
+                                 K,
+                                 fptr);
+
+        if (prediction == testing->labels[i]) {
+            num_correct += 1;
+        }
+    }
+
+    if (write(p_out, &num_correct, sizeof(int)) == -1) {
+        perror("Write to pipe");
+    }
+
+    close(p_out);
 
     return;
 }
@@ -188,5 +220,32 @@ double distance_cosine(Image *a, Image *b){
 
     //TODO
 
-    return 0.0;
+    double numerator = 0, denominator1 = 0, denominator2 = 0;
+
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        numerator += a->data[i] * b->data[i];
+        denominator1 += a->data[i] * a->data[i];
+        denominator2 += b->data[i] * b->data[i];
+    }
+
+    denominator1 = sqrt(denominator1);
+    if (isnan(denominator1)) {
+        perror("sqrt");
+        exit(1);
+    }
+    denominator2 = sqrt(denominator2);
+    if (isnan(denominator2)) {
+        perror("sqrt");
+        exit(1);
+    }
+
+    double total = acos(numerator / (denominator1 * denominator2));
+    if (isnan(total)) {
+        perror("acos");
+        exit(1);
+    }
+
+    total = (2 * total) / M_PI;
+
+    return total;
 }
