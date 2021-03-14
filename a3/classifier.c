@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
         switch(opt) {
         case 'v':
             verbose = 1;
+            break;
         case 'K':
             K = atoi(optarg);
             break;
@@ -91,17 +92,13 @@ int main(int argc, char *argv[]) {
     (void)num_procs;
   
     // Set which distance function to use
-    /* You can use the following string comparison which will allow
-     * prefix substrings to match:
-     * 
-     * If the condition below is true then the string matches
-     * if (strncmp(dist_metric, "euclidean", strlen(dist_metric)) == 0){
-     *      //found a match
-     * }
-     */ 
-  
-    // TODO
-
+    double (*fptr)(Image *, Image *);
+    if (strncmp(dist_metric, "euclidean", strlen(dist_metric)) == 0) {
+        fptr = &distance_euclidean;
+    }
+    else {
+        fptr = &distance_cosine;
+    }
 
     // Load data sets
     if(verbose) {
@@ -121,35 +118,97 @@ int main(int argc, char *argv[]) {
     }
 
     // Create the pipes and child processes who will then call child_handler
+    // Distribute the work to the children by writing their starting index and
+    // the number of test images to process to their write pipe
     if(verbose) {
         printf("- Creating children ...\n");
     }
 
-    // TODO
+    // File descriptors
+    int fd_parent_to_child[num_procs][2];
+    int fd_child_to_parent[num_procs][2];
 
+    // Declaring variables used in the loop
+    int images_per_child = testing->num_items / num_procs;
+    int start_idx = 0;
 
-    // Distribute the work to the children by writing their starting index and
-    // the number of test images to process to their write pipe
+    for (int i = 0; i < num_procs; i++) {
+        if (pipe(fd_parent_to_child[i]) == -1) {
+            perror("pipe");
+            exit(1);
+        }
+        if (pipe(fd_child_to_parent[i]) == -1) {
+            perror("pipe");
+            exit(1);
+        }
 
-    // TODO
+        int result = fork();
 
-
+        if (result < 0) {
+            perror("fork");
+            exit(1);
+        }
+        else if (result == 0) {
+            // Close pipes of previous children
+            for (int k = 0; k < i; k++) {
+                close(fd_parent_to_child[k][0]);
+                close(fd_parent_to_child[k][1]);
+                close(fd_child_to_parent[k][0]);
+                close(fd_child_to_parent[k][1]);
+            }
+            close(fd_parent_to_child[i][1]); 
+            close(fd_child_to_parent[i][0]);
+            child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
+            exit(0);
+        }
+        else {
+            if (testing->num_items % num_procs != 0) {
+                images_per_child += 1;
+            }
+            start_idx = images_per_child * i;
+            if (write(fd_parent_to_child[i][1], &(start_idx), sizeof(int)) == -1) {
+                perror("Write to pipe in parent");
+            }
+            if (write(fd_parent_to_child[i][1], &(images_per_child), sizeof(int)) == -1) {
+                perror("Write to pipe in parent");
+            }
+        }
+    }
 
     // Wait for children to finish
     if(verbose) {
         printf("- Waiting for children...\n");
     }
 
-    // TODO
-
+    int status;
+    for (int i = 0; i < num_procs; i++) {
+        if (wait(&status) != -1) {
+            if (WIFEXITED(status)) {
+                if (WEXITSTATUS(status)) {
+                    exit(1);
+                }
+            }
+        }
+    }
 
     // When the children have finised, read their results from their pipe
- 
-    // TODO
 
+    int child_correct;
+    for (int i = 0; i < num_procs; i++) {
+        close(fd_parent_to_child[i][0]);
+        close(fd_parent_to_child[i][1]);
+        close(fd_child_to_parent[i][1]);
+        if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
+            perror("Read from pipe in parent");
+            exit(1);
+        }
+        close(fd_child_to_parent[i][0]);
+        total_correct += child_correct;
 
+    }
 
-    if(verbose) {
+    if (verbose)
+    {
         printf("Number of correct predictions: %d\n", total_correct);
     }
 
@@ -158,9 +217,8 @@ int main(int argc, char *argv[]) {
 
     // Clean up any memory, open files, or open pipes
 
-    // TODO
-
-
+    free_dataset(training);
+    free_dataset(testing);
 
     return 0;
-}
+    }
