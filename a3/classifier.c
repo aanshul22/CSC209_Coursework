@@ -124,6 +124,9 @@ int main(int argc, char *argv[]) {
 
     // Declaring variables used in the loop
     int images_per_child = testing->num_items / num_procs;
+    if (testing->num_items % num_procs != 0) {
+        images_per_child += 1;
+    }
     int start_idx = 0;
 
     for (int i = 0; i < num_procs; i++) {
@@ -152,7 +155,7 @@ int main(int argc, char *argv[]) {
                 close(fd_child_to_parent[k][0]);
                 close(fd_child_to_parent[k][1]);
             }
-            close(fd_parent_to_child[i][1]); 
+            close(fd_parent_to_child[i][1]);
             close(fd_child_to_parent[i][0]);
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
             exit(0);
@@ -160,9 +163,6 @@ int main(int argc, char *argv[]) {
         else {
             close(fd_parent_to_child[i][0]);
 
-            if (testing->num_items % num_procs != 0) {
-                images_per_child += 1;
-            }
             start_idx = images_per_child * i;
             if (write(fd_parent_to_child[i][1], &(start_idx), sizeof(int)) == -1) {
                 perror("Write to pipe in parent");
@@ -195,8 +195,6 @@ int main(int argc, char *argv[]) {
 
     int child_correct;
     for (int i = 0; i < num_procs; i++) {
-        // close(fd_parent_to_child[i][0]);
-        // close(fd_parent_to_child[i][1]);
         close(fd_child_to_parent[i][1]);
         if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
             perror("Read from pipe in parent");
