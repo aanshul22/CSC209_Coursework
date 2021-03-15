@@ -84,12 +84,6 @@ int main(int argc, char *argv[]) {
     char *training_file = argv[optind];
     optind++;
     char *testing_file = argv[optind];
-
-    // TODO The following lines are included to prevent compiler warnings
-    // and should be removed when you use the variables.
-    (void)K;
-    (void)dist_metric;
-    (void)num_procs;
   
     // Set which distance function to use
     double (*fptr)(Image *, Image *);
@@ -141,7 +135,9 @@ int main(int argc, char *argv[]) {
             perror("pipe");
             exit(1);
         }
+    }
 
+    for (int i = 0; i < num_procs; i++) {
         int result = fork();
 
         if (result < 0) {
@@ -162,6 +158,8 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
         else {
+            close(fd_parent_to_child[i][0]);
+
             if (testing->num_items % num_procs != 0) {
                 images_per_child += 1;
             }
@@ -172,6 +170,8 @@ int main(int argc, char *argv[]) {
             if (write(fd_parent_to_child[i][1], &(images_per_child), sizeof(int)) == -1) {
                 perror("Write to pipe in parent");
             }
+
+            close(fd_parent_to_child[i][1]);
         }
     }
 
@@ -195,8 +195,8 @@ int main(int argc, char *argv[]) {
 
     int child_correct;
     for (int i = 0; i < num_procs; i++) {
-        close(fd_parent_to_child[i][0]);
-        close(fd_parent_to_child[i][1]);
+        // close(fd_parent_to_child[i][0]);
+        // close(fd_parent_to_child[i][1]);
         close(fd_child_to_parent[i][1]);
         if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
             perror("Read from pipe in parent");
@@ -204,7 +204,6 @@ int main(int argc, char *argv[]) {
         }
         close(fd_child_to_parent[i][0]);
         total_correct += child_correct;
-
     }
 
     if (verbose)
@@ -221,4 +220,4 @@ int main(int argc, char *argv[]) {
     free_dataset(testing);
 
     return 0;
-    }
+}
