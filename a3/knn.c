@@ -220,7 +220,7 @@ double distance_cosine(Image *a, Image *b){
 
     //TODO
 
-    double numerator = 0, denominator1 = 0, denominator2 = 0;
+    double numerator = 0, denominator1 = 0, denominator2 = 0, denominator = 0;
 
     for (int i = 0; i < NUM_PIXELS; i++) {
         numerator += a->data[i] * b->data[i];
@@ -228,22 +228,13 @@ double distance_cosine(Image *a, Image *b){
         denominator2 += b->data[i] * b->data[i];
     }
 
-    denominator1 = sqrt(denominator1);
-    if (isnan(denominator1)) {
-        perror("sqrt");
-        exit(1);
-    }
-    denominator2 = sqrt(denominator2);
-    if (isnan(denominator2)) {
+    denominator = sqrt(denominator1 * denominator2);
+    if (isnan(denominator)) {
         perror("sqrt");
         exit(1);
     }
 
-    double total = acos(numerator / (denominator1 * denominator2));
-    if (isnan(total)) {
-        perror("acos");
-        exit(1);
-    }
+    double total = acos(numerator / denominator);
 
     total = (2 * total) / M_PI;
 
