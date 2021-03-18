@@ -158,8 +158,8 @@ int main(int argc, char *argv[]) {
             close(fd_parent_to_child[i][1]);
             close(fd_child_to_parent[i][0]);
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
-            // free_dataset(training);
-            // free_dataset(testing);
+            free_dataset(training);
+            free_dataset(testing);
             exit(0);
         }
         else {
