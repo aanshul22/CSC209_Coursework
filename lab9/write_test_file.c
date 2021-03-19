@@ -8,23 +8,31 @@
  */
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: write_test_file filename\n");
-        exit(1);
-    }
+	if (argc != 2) {
+		fprintf(stderr, "Usage: write_test_file filename\n");
+		exit(1);
+	}
 
-    FILE *fp;
-    if ((fp = fopen(argv[1], "w")) == NULL) {
-        perror("fopen");
-        exit(1);
-    }
+	FILE *fp;
+	if ((fp = fopen(argv[1], "w")) == NULL) {
+		perror("fopen");
+		exit(1);
+	}
 
-    // TODO: complete this program according its description above.
+	int random_number;
+	for (int i = 0; i < 100; i++) {
+		random_number = random() % 100;
+		if (fwrite(&random_number, sizeof(int), 1, fp) == 0) {
+			if (feof(fp)) {
+				fprintf(stderr, "End of file reached for %s", argv[1]);
+			}
+			else {
+				perror("fwrite");
+			}
+			exit(1);
+		}
+	}
 
-
-
-
-
-    fclose(fp);
-    return 0;
+	fclose(fp);
+	return 0;
 }
