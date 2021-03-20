@@ -171,8 +171,6 @@ void free_dataset(Dataset *data) {
 void child_handler(Dataset *training, Dataset *testing, int K, 
                    double (*fptr)(Image *, Image *), int p_in, int p_out) {
 
-    //TODO
-
     int start_idx, N;
     // Maybe check for zero bytes read
     if (read(p_in, &start_idx, sizeof(int)) == -1) {
@@ -185,6 +183,10 @@ void child_handler(Dataset *training, Dataset *testing, int K,
     }
 
     close(p_in);
+
+    if (N == 0) {
+        fprintf(stderr, "No images for child\n");
+    }
 
     int prediction, num_correct = 0;
     for (int i = start_idx; i < fmin(start_idx + N, testing->num_items); i++)
