@@ -93,8 +93,6 @@ int knn_predict(Dataset *data, Image *input, int K, double (*fptr)(Image *, Imag
     // For each training image, compute the distance using the function pointer
     for (int i = 0; i < data->num_items; i++) {
         
-        // TODO Change the call below to call distance function passed in as
-        // a parameter
         double dist = (*fptr)(&data->images[i], input);
 
         // Find the maximum distance among the previous K closest
@@ -172,7 +170,8 @@ void child_handler(Dataset *training, Dataset *testing, int K,
                    double (*fptr)(Image *, Image *), int p_in, int p_out) {
 
     int start_idx, N;
-    // Maybe check for zero bytes read
+
+    // Reading integers from parent
     if (read(p_in, &start_idx, sizeof(int)) == -1) {
         perror("Read from pipe");
         exit(1);
@@ -184,6 +183,7 @@ void child_handler(Dataset *training, Dataset *testing, int K,
 
     close(p_in);
 
+    // Check if child doesn't have any images
     if (N == 0) {
         fprintf(stderr, "No images for child\n");
     }
@@ -201,6 +201,7 @@ void child_handler(Dataset *training, Dataset *testing, int K,
         }
     }
 
+    // Writing the number of correct predictions to parent
     if (write(p_out, &num_correct, sizeof(int)) == -1) {
         perror("Write to pipe");
     }
@@ -219,8 +220,6 @@ void child_handler(Dataset *training, Dataset *testing, int K,
  *   - "man acos" describes the arc cos funciton in the C math library
 */
 double distance_cosine(Image *a, Image *b){
-
-    //TODO
 
     double numerator = 0, denominator1 = 0, denominator2 = 0, denominator = 0;
 

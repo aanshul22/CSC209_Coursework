@@ -124,23 +124,29 @@ int main(int argc, char *argv[]) {
 
     // Declaring variables used in the loop
     int images_per_child = testing->num_items / num_procs;
+    // Alternative for not using ceil
     if (testing->num_items % num_procs != 0) {
         images_per_child += 1;
     }
     int start_idx = 0;
 
+    // Creating pipe for each process
     for (int i = 0; i < num_procs; i++) {
+        // Writing to children pipe
         if (pipe(fd_parent_to_child[i]) == -1) {
             perror("pipe");
             exit(1);
         }
+        // Reading from child pipe
         if (pipe(fd_child_to_parent[i]) == -1) {
             perror("pipe");
             exit(1);
         }
     }
 
+    // For each process...
     for (int i = 0; i < num_procs; i++) {
+        // Create a child
         int result = fork();
 
         if (result < 0) {
@@ -155,6 +161,7 @@ int main(int argc, char *argv[]) {
                 close(fd_child_to_parent[k][0]);
                 close(fd_child_to_parent[k][1]);
             }
+            // Closing necessary pipes
             close(fd_parent_to_child[i][1]);
             close(fd_child_to_parent[i][0]);
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
@@ -163,9 +170,11 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
         else {
+            // Closing necessary pipes
             close(fd_parent_to_child[i][0]);
 
             start_idx = images_per_child * i;
+            // Writing to children
             if (write(fd_parent_to_child[i][1], &(start_idx), sizeof(int)) == -1) {
                 perror("Write to pipe in parent");
             }
@@ -182,6 +191,7 @@ int main(int argc, char *argv[]) {
         printf("- Waiting for children...\n");
     }
 
+    // Waiting for all children, and checking if children exited without error
     int status;
     for (int i = 0; i < num_procs; i++) {
         if (wait(&status) != -1) {
@@ -194,7 +204,6 @@ int main(int argc, char *argv[]) {
     }
 
     // When the children have finised, read their results from their pipe
-
     int child_correct;
     for (int i = 0; i < num_procs; i++) {
         close(fd_child_to_parent[i][1]);
