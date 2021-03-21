@@ -90,8 +90,12 @@ int main(int argc, char *argv[]) {
     if (strncmp(dist_metric, "euclidean", strlen(dist_metric)) == 0) {
         fptr = &distance_euclidean;
     }
-    else {
+    else if (strncmp(dist_metric, "cosine", strlen(dist_metric)) == 0) {
         fptr = &distance_cosine;
+    }
+    else {
+        fprintf(stderr, "No such distance metric. Use euclidean or cosine.");
+        exit(1);
     }
 
     // Load data sets
