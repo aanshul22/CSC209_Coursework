@@ -178,7 +178,6 @@ int main(int argc, char *argv[]) {
             close(fd_parent_to_child[i][0]);
 			close(fd_child_to_parent[i][1]);
 
-			start_idx = images_per_child * i;
 			if (decrease_at == i) {
 				images_per_child--;
 			}
@@ -190,6 +189,7 @@ int main(int argc, char *argv[]) {
                 perror("Write to pipe in parent");
             }
 
+			start_idx += images_per_child;
             close(fd_parent_to_child[i][1]);
         }
     }
