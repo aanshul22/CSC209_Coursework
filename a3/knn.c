@@ -199,6 +199,7 @@ void child_handler(Dataset *training, Dataset *testing, int K,
     // Writing the number of correct predictions to parent
     if (write(p_out, &num_correct, sizeof(int)) == -1) {
         perror("Write to pipe");
+		exit(1);
     }
 
     close(p_out);

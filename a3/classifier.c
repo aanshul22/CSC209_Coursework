@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
         else {
             // Closing necessary pipes
             close(fd_parent_to_child[i][0]);
-			// close(fd_child_to_parent[i][1]);
+			close(fd_child_to_parent[i][1]);
 
 			start_idx = images_per_child * i;
 			if (decrease_at == i) {
@@ -199,7 +199,19 @@ int main(int argc, char *argv[]) {
         printf("- Waiting for children...\n");
     }
 
-    // Waiting for all children, and checking if children exited without error
+	// Reading results from pipe
+	int child_correct;
+	for (int i = 0; i < num_procs; i++) {
+		if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1)
+		{
+			perror("Read from pipe in parent");
+			exit(1);
+		}
+		close(fd_child_to_parent[i][0]);
+		total_correct += child_correct;
+	}
+
+	// Waiting for all children, and checking if children exited without error
     int status;
     for (int i = 0; i < num_procs; i++) {
         if (wait(&status) != -1) {
@@ -209,18 +221,6 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-    }
-
-    // When the children have finised, read their results from their pipe
-    int child_correct;
-    for (int i = 0; i < num_procs; i++) {
-        close(fd_child_to_parent[i][1]);
-        if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
-            perror("Read from pipe in parent");
-            exit(1);
-        }
-        close(fd_child_to_parent[i][0]);
-        total_correct += child_correct;
     }
 
     if (verbose)
