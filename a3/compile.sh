@@ -1,4 +1,4 @@
-#!/usr/bin/env bas
+#!/usr/bin/env bash
 ./classifier -p 48 -K 1 -d euc a2_datasets/training_data.bin a2_datasets/testing_data.bin & >> results.txt
 ./classifier -p 48 -K 2 -d euc a2_datasets/training_data.bin a2_datasets/testing_data.bin & >> results.txt
 ./classifier -p 48 -K 3 -d euc a2_datasets/training_data.bin a2_datasets/testing_data.bin & >> results.txt
