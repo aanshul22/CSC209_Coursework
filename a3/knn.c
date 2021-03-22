@@ -183,11 +183,6 @@ void child_handler(Dataset *training, Dataset *testing, int K,
 
     close(p_in);
 
-    // Check if child doesn't have any images
-    if (N == 0) {
-        fprintf(stderr, "No images for child\n");
-    }
-
     int prediction, num_correct = 0;
     for (int i = start_idx; i < fmin(start_idx + N, testing->num_items); i++)
     {

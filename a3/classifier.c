@@ -127,15 +127,15 @@ int main(int argc, char *argv[]) {
     int fd_child_to_parent[num_procs][2];
 
     // Declaring variables used in the loop
-    int images_per_child = testing->num_items / num_procs;
-    // Alternative for not using ceil
-    if (testing->num_items % num_procs != 0) {
-        images_per_child += 1;
-    }
-    int start_idx = 0;
+	int images_per_child = (testing->num_items / num_procs) + 1;
+	// Reduce images_per_child by 1 at decrease_at
+	// Ensures work is distributed evenly
+	int decrease_at = testing->num_items % num_procs;
+
+	int start_idx = 0;
 
     // Creating pipe for each process
-    for (int i = 0; i < num_procs; i++) {
+	for (int i = 0; i < num_procs; i++) {
         // Writing to children pipe
         if (pipe(fd_parent_to_child[i]) == -1) {
             perror("pipe");
@@ -176,8 +176,12 @@ int main(int argc, char *argv[]) {
         else {
             // Closing necessary pipes
             close(fd_parent_to_child[i][0]);
+			// close(fd_child_to_parent[i][1]);
 
-            start_idx = images_per_child * i;
+			start_idx = images_per_child * i;
+			if (decrease_at == i) {
+				images_per_child--;
+			}
             // Writing to children
             if (write(fd_parent_to_child[i][1], &(start_idx), sizeof(int)) == -1) {
                 perror("Write to pipe in parent");
