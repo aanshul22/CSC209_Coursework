@@ -181,8 +181,6 @@ void child_handler(Dataset *training, Dataset *testing, int K,
         exit(1);
     }
 
-    close(p_in);
-
     int prediction, num_correct = 0;
     for (int i = start_idx; i < fmin(start_idx + N, testing->num_items); i++)
     {
@@ -201,10 +199,6 @@ void child_handler(Dataset *training, Dataset *testing, int K,
         perror("Write to pipe");
 		exit(1);
     }
-
-    close(p_out);
-
-    return;
 }
 
 /**
