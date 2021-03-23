@@ -130,13 +130,13 @@ int main(int argc, char *argv[]) {
 	int images_per_child = (testing->num_items / num_procs) + 1;
 	// Reduce images_per_child by 1 at decrease_at
 	// Ensures work is distributed evenly
-	int decrease_at = testing->num_items % num_procs;
+	int decrease_at = testing->num_items % num_procs; // Remainder
 
 	int start_idx = 0;
 
-    // Creating pipe for each process
-	for (int i = 0; i < num_procs; i++) {
-        // Writing to children pipe
+    // For each process...
+    for (int i = 0; i < num_procs; i++) {
+        // Writing to child pipe
         if (pipe(fd_parent_to_child[i]) == -1) {
             perror("pipe");
             exit(1);
@@ -146,11 +146,8 @@ int main(int argc, char *argv[]) {
             perror("pipe");
             exit(1);
         }
-    }
 
-    // For each process...
-    for (int i = 0; i < num_procs; i++) {
-        // Create a child
+        // Creating a child
         int result = fork();
 
         if (result < 0) {
@@ -158,17 +155,17 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         else if (result == 0) {
-            // Close pipes of previous children
+            // Close open pipes of previous children
             for (int k = 0; k < i; k++) {
-                close(fd_parent_to_child[k][0]);
-                close(fd_parent_to_child[k][1]);
                 close(fd_child_to_parent[k][0]);
-                close(fd_child_to_parent[k][1]);
             }
             // Closing necessary pipes
             close(fd_parent_to_child[i][1]);
             close(fd_child_to_parent[i][0]);
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
+            close(fd_parent_to_child[i][0]);
+            close(fd_child_to_parent[i][1]);
+            // Free-ing allocated memory
             free_dataset(training);
             free_dataset(testing);
             exit(0);
