@@ -160,11 +160,23 @@ int main(int argc, char *argv[]) {
                 close(fd_child_to_parent[k][0]);
             }
             // Closing necessary pipes
-            close(fd_parent_to_child[i][1]);
-            close(fd_child_to_parent[i][0]);
+            if (close(fd_parent_to_child[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
+            if (close(fd_child_to_parent[i][0]) == -1) {
+                perror("close");
+                exit(1);
+            }
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
-            close(fd_parent_to_child[i][0]);
-            close(fd_child_to_parent[i][1]);
+            if (close(fd_parent_to_child[i][0]) == -1) {
+                perror("error");
+                exit(1);
+            }
+            if (close(fd_child_to_parent[i][1]) == -1) {
+                perror("error");
+                exit(1);
+            }
             // Free-ing allocated memory
             free_dataset(training);
             free_dataset(testing);
@@ -172,8 +184,14 @@ int main(int argc, char *argv[]) {
         }
         else {
             // Closing necessary pipes
-            close(fd_parent_to_child[i][0]);
-			close(fd_child_to_parent[i][1]);
+            if (close(fd_parent_to_child[i][0]) == -1) {
+                perror("close");
+                exit(1);
+            }
+			if (close(fd_child_to_parent[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
 
 			if (decrease_at == i) {
 				images_per_child--;
@@ -187,7 +205,10 @@ int main(int argc, char *argv[]) {
             }
 
 			start_idx += images_per_child;
-            close(fd_parent_to_child[i][1]);
+            if (close(fd_parent_to_child[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
         }
     }
 
@@ -204,7 +225,10 @@ int main(int argc, char *argv[]) {
 			perror("Read from pipe in parent");
 			exit(1);
 		}
-		close(fd_child_to_parent[i][0]);
+		if (close(fd_child_to_parent[i][0]) == -1) {
+            perror("close");
+            exit(1);
+        }
 		total_correct += child_correct;
 	}
 
