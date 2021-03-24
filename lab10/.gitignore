@@ -1,0 +1,5 @@
+*
+!*.c
+!socket.h
+!Makefile
+!.gitignore
