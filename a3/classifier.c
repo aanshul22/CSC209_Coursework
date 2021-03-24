@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         printf("- Creating children ...\n");
     }
 
-    // File descriptors
+    // File descriptors (Two for each child)
     int fd_parent_to_child[num_procs][2];
     int fd_child_to_parent[num_procs][2];
 
@@ -136,12 +136,11 @@ int main(int argc, char *argv[]) {
 
     // For each process...
     for (int i = 0; i < num_procs; i++) {
-        // Writing to child pipe
+        // Creating pipes
         if (pipe(fd_parent_to_child[i]) == -1) {
             perror("pipe");
             exit(1);
         }
-        // Reading from child pipe
         if (pipe(fd_child_to_parent[i]) == -1) {
             perror("pipe");
             exit(1);
@@ -160,11 +159,23 @@ int main(int argc, char *argv[]) {
                 close(fd_child_to_parent[k][0]);
             }
             // Closing necessary pipes
-            close(fd_parent_to_child[i][1]);
-            close(fd_child_to_parent[i][0]);
+            if (close(fd_parent_to_child[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
+            if (close(fd_child_to_parent[i][0]) == -1) {
+                perror("close");
+                exit(1);
+            }
             child_handler(training, testing, K, fptr, fd_parent_to_child[i][0], fd_child_to_parent[i][1]);
-            close(fd_parent_to_child[i][0]);
-            close(fd_child_to_parent[i][1]);
+            if (close(fd_parent_to_child[i][0]) == -1) {
+                perror("error");
+                exit(1);
+            }
+            if (close(fd_child_to_parent[i][1]) == -1) {
+                perror("error");
+                exit(1);
+            }
             // Free-ing allocated memory
             free_dataset(training);
             free_dataset(testing);
@@ -172,8 +183,14 @@ int main(int argc, char *argv[]) {
         }
         else {
             // Closing necessary pipes
-            close(fd_parent_to_child[i][0]);
-			close(fd_child_to_parent[i][1]);
+            if (close(fd_parent_to_child[i][0]) == -1) {
+                perror("close");
+                exit(1);
+            }
+			if (close(fd_child_to_parent[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
 
 			if (decrease_at == i) {
 				images_per_child--;
@@ -187,7 +204,10 @@ int main(int argc, char *argv[]) {
             }
 
 			start_idx += images_per_child;
-            close(fd_parent_to_child[i][1]);
+            if (close(fd_parent_to_child[i][1]) == -1) {
+                perror("close");
+                exit(1);
+            }
         }
     }
 
@@ -199,12 +219,14 @@ int main(int argc, char *argv[]) {
 	// Reading results from pipe
 	int child_correct;
 	for (int i = 0; i < num_procs; i++) {
-		if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1)
-		{
+		if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
 			perror("Read from pipe in parent");
 			exit(1);
 		}
-		close(fd_child_to_parent[i][0]);
+		if (close(fd_child_to_parent[i][0]) == -1) {
+            perror("close");
+            exit(1);
+        }
 		total_correct += child_correct;
 	}
 
