@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         printf("- Creating children ...\n");
     }
 
-    // File descriptors
+    // File descriptors (Two for each child)
     int fd_parent_to_child[num_procs][2];
     int fd_child_to_parent[num_procs][2];
 
@@ -136,12 +136,11 @@ int main(int argc, char *argv[]) {
 
     // For each process...
     for (int i = 0; i < num_procs; i++) {
-        // Writing to child pipe
+        // Creating pipes
         if (pipe(fd_parent_to_child[i]) == -1) {
             perror("pipe");
             exit(1);
         }
-        // Reading from child pipe
         if (pipe(fd_child_to_parent[i]) == -1) {
             perror("pipe");
             exit(1);
@@ -220,8 +219,7 @@ int main(int argc, char *argv[]) {
 	// Reading results from pipe
 	int child_correct;
 	for (int i = 0; i < num_procs; i++) {
-		if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1)
-		{
+		if (read(fd_child_to_parent[i][0], &child_correct, sizeof(int)) == -1) {
 			perror("Read from pipe in parent");
 			exit(1);
 		}
