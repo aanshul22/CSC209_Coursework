@@ -156,7 +156,10 @@ int main(int argc, char *argv[]) {
         else if (result == 0) {
             // Close open pipes of previous children
             for (int k = 0; k < i; k++) {
-                close(fd_child_to_parent[k][0]);
+                if (close(fd_child_to_parent[k][0]) == -1) {
+					perror("close");
+					exit(1);
+				}
             }
             // Closing necessary pipes
             if (close(fd_parent_to_child[i][1]) == -1) {
