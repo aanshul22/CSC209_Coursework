@@ -68,12 +68,11 @@ int main() {
                 // of the buffer.  A loop can do it, or you can use memmove.
                 // memmove(destination, source, number_of_bytes)
 				memmove(buf, &buf[where], inbuf - where);
-
-
-            }
+				inbuf = inbuf - where;
+			}
             // Step 5: update after and room, in preparation for the next read.
-			after = &buf[inbuf - where];
-			room = room - inbuf + where;
+			after = &buf[inbuf];
+			room = BUFSIZE - inbuf;
 		}
         close(fd);
         printf("The connection is now closed ...\n");
