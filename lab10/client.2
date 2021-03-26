@@ -1,4 +1,4 @@
-Script started on 2021-03-24 17:49:32+05:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="104" LINES="23"]
+Script started on 2021-03-26 16:30:41+05:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="90" LINES="25"]
 ]0;xruvix@Xruvix-Rig: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[01;32mxruvix@Xruvix-Rig[00m:[01;34m/mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[00m$ gdb randclient
 [35;1m[35;1mGNU gdb [m[35;1m(Ubuntu 9.2-0ubuntu1~20.04) [m[35;1m9.2[m[35;1m
 [m[mCopyright (C) 2020 Free Software Foundation, Inc.
@@ -28,41 +28,24 @@ Breakpoint 1, [33mmain[m ([36margc[m=21845, [36margv[m=0x0) at [32mrandcl
 (gdb) 
 29	    int soc = connect_to_server(PORT, argv[1]);
 (gdb) 
-connect: Connection refused
-[Inferior 1 (process 1388) exited with code 01]
-(gdb) run 127.0.0.1
-Starting program: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10/randclient 127.0.0.1
-
-Breakpoint 1, [33mmain[m ([36margc[m=21845, [36margv[m=0x0) at [32mrandclient.c[m:23
-23	int main(int argc, char **argv) {
-(gdb) n
-24	    if (argc != 2) {
-(gdb) 
-29	    int soc = connect_to_server(PORT, argv[1]);
-(gdb) 
 31	    write_random_pieces(soc, MESSAGE, TIMES);
-(gdb) p MESSG[KAE[KGE
-No symbol "MESSAGE" in current context.
 (gdb) 
-No symbol "MESSAGE" in current context.
-(gdb) n
 33	    close(soc);
 (gdb) 
 34	    return 0;
 (gdb) 
 35	}
 (gdb) 
-[33m__libc_start_main[m ([36mmain[m=0x5555555553c9 <main>, [36margc[m=2, [36margv[m=0x7fffffffdc28, [36minit[m=<optimized out>, [m
-    [m[36mfini[m=<optimized out>, [36mrtld_fini[m=<optimized out>, [36mstack_end[m=0x7fffffffdc18)[m
-   [m at [32m../csu/libc-start.c[m:342
+[33m__libc_start_main[m ([36mmain[m=0x5555555553c9 <main>, [36margc[m=2, [36margv[m=0x7fffffffdc28, [m
+    [m[36minit[m=<optimized out>, [36mfini[m=<optimized out>, [36mrtld_fini[m=<optimized out>, [m
+    [m[36mstack_end[m=0x7fffffffdc18) at [32m../csu/libc-start.c[m:342
 342	../csu/libc-start.c: No such file or directory.
+(gdb) 
+[Inferior 1 (process 369) exited normally]
+(gdb) 
+The program is not being run.
 (gdb) q
-A debugging session is active.
-
-	Inferior 1 [process 1396] will be killed.
-
-Quit anyway? (y or n) q[Ky
 ]0;xruvix@Xruvix-Rig: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[01;32mxruvix@Xruvix-Rig[00m:[01;34m/mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[00m$ exit
 exit
 
-Script done on 2021-03-24 17:54:25+05:30 [COMMAND_EXIT_CODE="0"]
+Script done on 2021-03-26 16:31:07+05:30 [COMMAND_EXIT_CODE="0"]
