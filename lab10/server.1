@@ -1,5 +1,5 @@
-Script started on 2021-03-26 16:13:35+05:30 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="90" LINES="24"]
-]0;xruvix@Xruvix-Rig: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[01;32mxruvix@Xruvix-Rig[00m:[01;34m/mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[00m$ gdb bufserver
+Script started on 2021-03-29 02:02:08+05:30 [TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="96" LINES="25"]
+]0;xruvix@Xruvix-Rig: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[01;32mxruvix@Xruvix-Rig[00m:[01;34m/mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[00m$ gdb ./bufserver
 [35;1m[35;1mGNU gdb [m[35;1m(Ubuntu 9.2-0ubuntu1~20.04) [m[35;1m9.2[m[35;1m
 [m[mCopyright (C) 2020 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -15,14 +15,14 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from [32mbufserver[m...
+Reading symbols from [32m./bufserver[m...
 (gdb) break set_up_server_socket
 Breakpoint 1 at [34m0x1646[m: file [32msocket.c[m, line 35.
 (gdb) run
 Starting program: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10/bufserver 
 
-Breakpoint 1, [33mset_up_server_socket[m ([36mself[m=0x555555555635 <init_server_addr+85>, [m
-    [m[36mnum_queue[m=21845) at [32msocket.c[m:35
+Breakpoint 1, [33mset_up_server_socket[m ([36mself[m=0x555555555635 <init_server_addr+85>, [36mnum_queue[m=21845)[m
+   [m at [32msocket.c[m:35
 35	int set_up_server_socket(struct sockaddr_in *self, int num_queue) {
 (gdb) n
 36	    int soc = socket(PF_INET, SOCK_STREAM, 0);
@@ -47,15 +47,137 @@ Breakpoint 1, [33mset_up_server_socket[m ([36mself[m=0x555555555635 <init_se
 27	        int fd = accept_connection(listenfd);
 (gdb) 
 Waiting for a new connection...
-New connection accepted from 127.0.0.1:41096
+New connection accepted from 127.0.0.1:35196
 28	        if (fd < 0) {
+(gdb) 
+33	        char buf[BUFSIZE] = {'\0'};
+(gdb) 
+34	        int inbuf = 0;           // How many bytes currently in buffer?
+(gdb) 
+35	        int room = sizeof(buf);  // How many bytes remaining in buffer?
+(gdb) 
+36	        char *after = buf;       // Pointer to position after the data in buf
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+41				inbuf += nbytes;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+59					buf[where - 2] = '\0';
+(gdb) 
+60	                printf("Next message: %s\n", buf);
+(gdb) 
+Next message: A stitch in time
+70					memmove(buf, &buf[where], inbuf - where);
+(gdb) 
+71					inbuf = inbuf - where;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+74				after = &buf[inbuf];
+(gdb) 
+75				room = BUFSIZE - inbuf;
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+41				inbuf += nbytes;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+59					buf[where - 2] = '\0';
+(gdb) 
+60	                printf("Next message: %s\n", buf);
+(gdb) 
+Next message: A stitch in time
+70					memmove(buf, &buf[where], inbuf - where);
+(gdb) 
+71					inbuf = inbuf - where;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+74				after = &buf[inbuf];
+(gdb) 
+75				room = BUFSIZE - inbuf;
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+41				inbuf += nbytes;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+59					buf[where - 2] = '\0';
+(gdb) 
+60	                printf("Next message: %s\n", buf);
+(gdb) 
+Next message: A stitch in time
+70					memmove(buf, &buf[where], inbuf - where);
+(gdb) 
+71					inbuf = inbuf - where;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+74				after = &buf[inbuf];
+(gdb) 
+75				room = BUFSIZE - inbuf;
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+41				inbuf += nbytes;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+59					buf[where - 2] = '\0';
+(gdb) 
+60	                printf("Next message: %s\n", buf);
+(gdb) 
+Next message: A stitch in time
+70					memmove(buf, &buf[where], inbuf - where);
+(gdb) 
+71					inbuf = inbuf - where;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+74				after = &buf[inbuf];
+(gdb) 
+75				room = BUFSIZE - inbuf;
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+41				inbuf += nbytes;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+59					buf[where - 2] = '\0';
+(gdb) 
+60	                printf("Next message: %s\n", buf);
+(gdb) 
+Next message: A stitch in time
+70					memmove(buf, &buf[where], inbuf - where);
+(gdb) 
+71					inbuf = inbuf - where;
+(gdb) 
+52	            while ((where = find_network_newline(buf, inbuf)) > 0) {
+(gdb) 
+74				after = &buf[inbuf];
+(gdb) 
+75				room = BUFSIZE - inbuf;
+(gdb) 
+39	        while ((nbytes = read(fd, after, room)) > 0) {
+(gdb) 
+77	        close(fd);
+(gdb) 
+78	        printf("The connection is now closed ...\n");
+(gdb) 
+The connection is now closed ...
+27	        int fd = accept_connection(listenfd);
 (gdb) q
 A debugging session is active.
 
-	Inferior 1 [process 242] will be killed.
+	Inferior 1 [process 56] will be killed.
 
 Quit anyway? (y or n) y
 ]0;xruvix@Xruvix-Rig: /mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[01;32mxruvix@Xruvix-Rig[00m:[01;34m/mnt/c/Users/aansh/Dropbox/Year2/CSC209/agraw143/lab10[00m$ exit
 exit
 
-Script done on 2021-03-26 16:15:48+05:30 [COMMAND_EXIT_CODE="0"]
+Script done on 2021-03-29 02:04:31+05:30 [COMMAND_EXIT_CODE="0"]
