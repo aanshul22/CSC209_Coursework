@@ -75,7 +75,7 @@ int main(void) {
                 break;
             }
             buf[num_read] = '\0';
-            printf("[Server] %s", buf);
+            printf("%s", buf);
         }
 
         if (FD_ISSET(STDIN_FILENO, &listen_fds))
