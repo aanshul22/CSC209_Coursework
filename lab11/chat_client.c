@@ -53,31 +53,46 @@ int main(void) {
         exit(1);
     }
 
+    int max_fd = sock_fd;
+    fd_set all_fds;
+    FD_ZERO(&all_fds);
+    FD_SET(sock_fd, &all_fds);
+    FD_SET(STDIN_FILENO, &all_fds);
+
     // Read input from the user, send it to the server, and then accept the
     // echo that returns. Exit when stdin is closed.
     while (1) {
-        int num_read = read(STDIN_FILENO, buf, BUF_SIZE);
-        if (num_read == 0) {
-            break;
-        }
-        buf[num_read] = '\0';
-
-        /*
-         * We should really send "\r\n" too, so the server can identify partial
-         * reads, but you are not required to handle partial reads in this lab.
-         */
-        if (write(sock_fd, buf, num_read) != num_read) {
-            perror("client: write");
-            close(sock_fd);
+        fd_set listen_fds = all_fds;
+        if (select(max_fd + 1, &listen_fds, NULL, NULL, NULL) == -1)
+        {
+            perror("server: select");
             exit(1);
         }
 
-        num_read = read(sock_fd, buf, BUF_SIZE);
-        if (num_read == 0) {
-            break;
+        if (FD_ISSET(sock_fd, &listen_fds))
+        {
+            if ((num_read = read(sock_fd, buf, BUF_SIZE)) == 0) {
+                break;
+            }
+            buf[num_read] = '\0';
+            printf("[Server] %s", buf);
         }
-        buf[num_read] = '\0';
-        printf("[Server] %s", buf);
+
+        if (FD_ISSET(STDIN_FILENO, &listen_fds))
+        {
+            if ((num_read = read(STDIN_FILENO, buf, BUF_SIZE)) == 0)
+            {
+                break;
+            }
+            buf[num_read] = '\0';
+            if (write(sock_fd, buf, num_read) != num_read)
+            {
+                perror("client: write");
+                close(sock_fd);
+                exit(1);
+            }
+        }
+
     }
 
     close(sock_fd);
