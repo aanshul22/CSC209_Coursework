@@ -81,10 +81,11 @@ int read_from(int client_index, struct sockname *usernames) {
         strncpy(usernames[client_index].username, buf, num_read);
     }
     else {
-        char message_buf[BUF_SIZE + 1];
-        sprintf(message_buf, "%s", usernames[client_index].username);
-        strncat(message_buf, ": ", 3);
-        strncat(message_buf, buf, strlen(buf));
+        char message_buf[2 * BUF_SIZE + 2];
+        strncpy(message_buf, usernames[client_index].username, 2 * BUF_SIZE + 2);
+        message_buf[BUF_SIZE + 1] = '\0';
+        strncat(message_buf, ": ", 2 * BUF_SIZE + 2 - strlen(message_buf));
+        strncat(message_buf, buf, 2 * BUF_SIZE + 2 - strlen(message_buf));
         for (int index = 0; index < MAX_CONNECTIONS; index++)
         {
             if (usernames[index].sock_fd != -1) {
