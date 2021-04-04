@@ -1,4 +1,4 @@
-PORT= X # Change this port number as described in the handout
+PORT = 55368
 CFLAGS = -g -Wall -std=gnu99
 
 all: auction_server auction_client
