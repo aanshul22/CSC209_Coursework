@@ -218,6 +218,7 @@ int main(void) {
     // TODO
 	int fd;
 	int port;
+	int index;
 	int command;
 
 	char buf[BUF_SIZE];
@@ -225,11 +226,11 @@ int main(void) {
 	char arg2[BUF_SIZE];
 
 	struct auction_data auctions[MAX_AUCTIONS];
-	for (int index = 0; index < MAX_AUCTIONS; index++)
+	for (int i = 0; i < MAX_AUCTIONS; i++)
 	{
-		auctions[index].sock_fd = -1;
-		auctions[index].item[0] = '\0';
-		auctions[index].current_bid = -1;
+		auctions[i].sock_fd = -1;
+		auctions[i].item[0] = '\0';
+		auctions[i].current_bid = -1;
 	}
 
 	// Get the user to provide a name.
@@ -296,10 +297,16 @@ int main(void) {
 				}
 			}
 			else if (command == BID) {
+				// Index of auction in auctions list
+				index = strtol(arg1, NULL, 10);
+				// Checking if index is valid index. Prevents seg fault
+				if (!(0 <= index < MAX_AUCTIONS)) {
+					printf("There is no auction open at %ld\n", index);
+				}
 				// fd of auction bidding to
-				fd = auctions[strtol(arg1, NULL, 10)].sock_fd;
+				fd = auctions[index].sock_fd;
 				if (fd == -1) {
-					printf("There is no auction open at %ld\n", strtol(arg1, NULL, 10));
+					printf("There is no auction open at %ld\n", index);
 				}
 				else {
 					// Write bid value to server
