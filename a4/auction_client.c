@@ -300,20 +300,22 @@ int main(void) {
 				// Index of auction in auctions list
 				index = strtol(arg1, NULL, 10);
 				// Checking if index is valid index. Prevents seg fault
-				if (!(0 <= index < MAX_AUCTIONS)) {
-					printf("There is no auction open at %ld\n", index);
-				}
-				// fd of auction bidding to
-				fd = auctions[index].sock_fd;
-				if (fd == -1) {
-					printf("There is no auction open at %ld\n", index);
+				if (index < 0 || index >= MAX_AUCTIONS) {
+					printf("There is no auction open at %d\n", index);
 				}
 				else {
-					// Write bid value to server
-					if (write(fd, arg2, strlen(arg2) + 1) != strlen(arg2) + 1) {
-						perror("client: write");
-						close(auctions[strtol(arg1, NULL, 10)].sock_fd);
-						exit(1);
+					// fd of auction bidding to
+					fd = auctions[index].sock_fd;
+					if (fd == -1) {
+						printf("There is no auction open at %d\n", index);
+					}
+					else {
+						// Write bid value to server
+						if (write(fd, arg2, strlen(arg2) + 1) != strlen(arg2) + 1) {
+							perror("client: write");
+							close(auctions[strtol(arg1, NULL, 10)].sock_fd);
+							exit(1);
+						}
 					}
 				}
 			}
