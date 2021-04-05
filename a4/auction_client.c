@@ -158,20 +158,22 @@ void print_auctions(struct auction_data *a, int size) {
 void update_auction(char *buf, int size, struct auction_data *a, int index) {
     
     // TODO: Complete this function
-	fprintf(stderr, "%s", buf);
+
 	char *ptr = NULL;
+
+	// first word in buf - item
 	ptr = strtok(buf, " ");
 	if (ptr == NULL) {
 		fprintf(stderr, "ERROR malformed bid: %s", buf);
 		return;
 	}
-	if (a[index].item[0] == '\0') {
+	if (a[index].item[0] == '\0') { // If we don't have item name, add it
 		strncpy(a[index].item, ptr, BUF_SIZE);
 	}
 
-	// Bid value
+	// second word in buf - bid value
 	ptr = strtok(NULL, " ");
-	if (ptr != NULL){
+	if (ptr != NULL){ // Setting current bid value
 		a[index].current_bid = strtol(ptr, NULL, 10);
 	} 
 	else {
@@ -179,7 +181,7 @@ void update_auction(char *buf, int size, struct auction_data *a, int index) {
 		return;
 	}
 
-	// Time left
+	// third word in buf - time left
 	int time_left = 0;
 	ptr = strtok(NULL, " ");
 	if (ptr != NULL) {
@@ -217,9 +219,11 @@ int main(void) {
 	int fd;
 	int port;
 	int command;
+
 	char buf[BUF_SIZE];
 	char arg1[BUF_SIZE];
 	char arg2[BUF_SIZE];
+
 	struct auction_data auctions[MAX_AUCTIONS];
 	for (int index = 0; index < MAX_AUCTIONS; index++)
 	{
@@ -239,7 +243,7 @@ int main(void) {
 	name[num_read] = '\0';
 	print_menu();
 
-    // TODO
+    // Initializing variables for select call
 	int max_fd = STDIN_FILENO;
 	fd_set all_fds;
 	FD_ZERO(&all_fds);
@@ -247,7 +251,6 @@ int main(void) {
 
 	while(1) {
         print_prompt();
-        // TODO
 
 		fd_set listen_fds = all_fds;
 		if (select(max_fd + 1, &listen_fds, NULL, NULL, NULL) == -1) {
@@ -257,25 +260,35 @@ int main(void) {
 
 		// Checking for Standard input
 		if (FD_ISSET(STDIN_FILENO, &listen_fds)) {
+			// Reading input into buf
 			if ((num_read = read(STDIN_FILENO, buf, BUF_SIZE)) == 0) {
 				break;
 			}
 			buf[num_read] = '\0';
 
 			command = parse_command(buf, BUF_SIZE, arg1, arg2);
+
+			// Checking which command was called
 			if (command == SHOW) {
 				print_auctions(auctions, MAX_AUCTIONS);
 			}
 			else if (command == ADD) {
+				// Find the next empty slot
 				int i = 0;
-				while (auctions[i].sock_fd != -1) { i++; }  // Find the next empty slot
-				port = strtol(arg2, NULL, 10);
+				while (auctions[i].sock_fd != -1) { i++; }
+
+				port = strtol(arg2, NULL, 10); // Converting port to integer
+
 				auctions[i].sock_fd = add_server(arg1, port);
+
+				// Add server's fd to all_fds so that select can look for it
 				FD_SET(auctions[i].sock_fd, &all_fds);
+				// Update max_fd
 				if (auctions[i].sock_fd > max_fd) {
 					max_fd = auctions[i].sock_fd;
 				}
 
+				// Write client name to server
 				if (write(auctions[i].sock_fd, name, strlen(name) + 1) != strlen(name) + 1) {
 					perror("Client: write name");
 					close(auctions[i].sock_fd);
@@ -283,11 +296,13 @@ int main(void) {
 				}
 			}
 			else if (command == BID) {
+				// fd of auction bidding to
 				fd = auctions[strtol(arg1, NULL, 10)].sock_fd;
 				if (fd == -1) {
 					printf("There is no auction open at %ld\n", strtol(arg1, NULL, 10));
 				}
 				else {
+					// Write bid value to server
 					if (write(fd, arg2, strlen(arg2) + 1) != strlen(arg2) + 1) {
 						perror("client: write");
 						close(auctions[strtol(arg1, NULL, 10)].sock_fd);
@@ -299,7 +314,7 @@ int main(void) {
 				close_all_sockets(auctions, MAX_AUCTIONS);
 				exit(0);
 			}
-			else {
+			else { // If not a valid command
 				print_menu();
 			}
 		}
@@ -307,17 +322,18 @@ int main(void) {
 		// Next, check all servers
 		for (int index = 0; index < MAX_AUCTIONS; ++index)
 		{
+			// If connected to server and server has sent something
 			if (auctions[index].sock_fd != -1 && FD_ISSET(auctions[index].sock_fd, &listen_fds))
 			{
 				// Reading from server 
 				num_read = read(auctions[index].sock_fd, &buf, BUF_SIZE);
-				buf[num_read] = '\0';
-				if (num_read == 0) {
+				if (num_read == 0) { // If server has disconnected
 					close(auctions[index].sock_fd);
 					FD_CLR(auctions[index].sock_fd, &all_fds);
 					auctions[index].sock_fd = -1;
 				}
 
+				buf[num_read] = '\0';
 				// Checking if auction has been closed
 				if (strncmp(buf, "Auction closed", strlen("Auction closed")) == 0)
 				{
@@ -326,7 +342,7 @@ int main(void) {
 					FD_CLR(auctions[index].sock_fd, &all_fds);
 					auctions[index].sock_fd = -1;
 				}
-				else {
+				else { // server sent: item bid_value time_left
 					update_auction(buf, strlen(buf), auctions, index);
 				}
 			}
