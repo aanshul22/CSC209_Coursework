@@ -135,7 +135,7 @@ int add_server(char *hostname, int port) {
 void print_auctions(struct auction_data *a, int size) {
     printf("Current Auctions:\n");
 
-    /* TODO Print the auction data for each currently connected 
+    /* Print the auction data for each currently connected 
      * server.  Use the follosing format string:
      *     "(%d) %s bid = %d\n", index, item, current bid
      * The array may have some elements where the auction has closed and
@@ -156,8 +156,6 @@ void print_auctions(struct auction_data *a, int size) {
  * to the item field.  (Note that an item cannot have a space character in it.)
  */
 void update_auction(char *buf, int size, struct auction_data *a, int index) {
-    
-    // TODO: Complete this function
 
 	char *ptr = NULL;
 
@@ -169,6 +167,7 @@ void update_auction(char *buf, int size, struct auction_data *a, int index) {
 	}
 	if (a[index].item[0] == '\0') { // If we don't have item name, add it
 		strncpy(a[index].item, ptr, BUF_SIZE);
+		a[index].item[BUF_SIZE - 1] = '\0';
 	}
 
 	// second word in buf - bid value
@@ -215,7 +214,7 @@ int main(void) {
     char name[BUF_SIZE];
 
     // Declare and initialize necessary variables
-    // TODO
+
 	int fd;
 	int port;
 	int index;
@@ -299,6 +298,7 @@ int main(void) {
 			else if (command == BID) {
 				// Index of auction in auctions list
 				index = strtol(arg1, NULL, 10);
+
 				// Checking if index is valid index. Prevents seg fault
 				if (index < 0 || index >= MAX_AUCTIONS) {
 					printf("There is no auction open at %d\n", index);
