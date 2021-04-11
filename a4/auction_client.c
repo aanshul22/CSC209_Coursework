@@ -336,23 +336,33 @@ int main(void) {
 			{
 				// Reading from server 
 				num_read = read(auctions[index].sock_fd, &buf, BUF_SIZE);
-				if (num_read == 0) { // If server has disconnected
+				if (num_read < 0) {
+					perror("read");
+					close(auctions[index].sock_fd);
+					exit(1);
+				}
+				else if (num_read == 0) { // If server has disconnected
 					close(auctions[index].sock_fd);
 					FD_CLR(auctions[index].sock_fd, &all_fds);
 					auctions[index].sock_fd = -1;
+					auctions[index].current_bid = -1;
+					auctions[index].item[0] = '\0';
+					printf("Auction server disconnected: %d\n", index);
 				}
-
-				buf[num_read] = '\0';
-				// Checking if auction has been closed
-				if (strncmp(buf, "Auction closed", strlen("Auction closed")) == 0)
-				{
-					printf("%s", buf);
-					close(auctions[index].sock_fd);
-					FD_CLR(auctions[index].sock_fd, &all_fds);
-					auctions[index].sock_fd = -1;
-				}
-				else { // server sent: item bid_value time_left
-					update_auction(buf, strlen(buf), auctions, index);
+				else { // If server has sent some message
+					buf[num_read] = '\0';
+					// Checking if auction has been closed
+					if (strncmp(buf, "Auction closed", strlen("Auction closed")) == 0)
+					{
+						printf("%s", buf);
+						close(auctions[index].sock_fd);
+						FD_CLR(auctions[index].sock_fd, &all_fds);
+						auctions[index].sock_fd = -1;
+					}
+					else
+					{ // server sent: item bid_value time_left
+						update_auction(buf, strlen(buf), auctions, index);
+					}
 				}
 			}
 		}
